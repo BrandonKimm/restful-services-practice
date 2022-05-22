@@ -1,0 +1,112 @@
+# REST API 기초지식
+
+### AOP를 이용한 예외처리
+
+- `@ResponseStatus(HttpStatus.*NOT_FOUND*)` `UserNotFoundException`.class
+
+Error 정책 (화면에서 잘못된 ID 넘겼을 때 )
+
+- `@ControllerAdvice`   `extends ResponseEntityExceptionHandler`
+- @ExceptionHandler(exception.class)
+
+예외패키지가 @SpringBootApplication 하위에 없어서 많이 고생했었던 기억을 잊지않기!
+
+*덕분에 공부했던 프록시와 cglib 내용! cglib은 상속기반이기 때문에  타겟의 private, final 메소드는 AOP대상에 잡히지 않는다는 점 JDK DynamicProxy는 바이트코드기반 reflection이고 인터페이스만 AOP대상이 된다는 점과 스프링에서 proxy 는 프록시패턴보다는 템플릿메소드패턴과 유사했다는 느낌 기억하기! 깊은 학습필요!
+
+스프링의 예외처리는 전략패턴을 이용한 HandlerExceptionResolver 인터페이스를 활용하는데
+
+핸들러에서 예외가 발생하면 디스패처서블릿까지 던지고 아래 4가지 리졸버를 이용한다.
+
+- 예외가 던져지면 먼저 예외가 발생한 컨트롤러 안에 적합한 @ExceptionHandler가 있는지 검사함
+- 컨트롤러의 @ExceptionHandler에서 처리가능하다면 처리하고, 그렇지않으면 넘어감
+- 컨트롤러의 @ExceptionHandler에서 처리가 불가능하다면 ControllerAdvice를 찾고 적합한 @ExceptionHandler가 있는지 검사함
+- ControllerAdivce에서 처리가 가능하다면 처리하고, 그렇지않으면 넘어감
+- ControllerAdvice에서 처리가 불가능하면 @ResponseStatus가 있는지 또는 ResponseStatusException인지 검사함
+- 맞다면 ResponseStatusExceptionResolver가 처리하고, 그렇지 않다면 DefaultHandlerExceptionResolver가 처리함
+
+ExceptionHandler는 컨트롤러마다 설정하기 좀 그래서 안쓰고
+
+*ResponseStatusException를 쓰면 편하긴편한데 통합적인 관점에서 ControllerAdvice사용함!*
+
+---
+
+### 그 외 부가기능
+
+Validatation
+
+- 부트 2.5에서는 실습을 위한 @Past, @Size 작동하지않아서 추가 validation 의존성 추가
+
+`spring-boot-starter-validation`
+
+International
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/ff0bfee0-ddec-4310-9f6c-91c574412a3e/Untitled.png)
+
+Response Data XML 형식 (디폴트 json)
+
+- `jackson-dataformat-xml` 의존성추가
+- 요청 시 header.accept = application/xml 추가
+-
+
+Response 데이터 제어 Filtering
+
+`@JsonIgnoreProperties(value={"password", "ssn"})` / @JsonIgnore 필드
+
+`@JsonFilter("UserInfo")`
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/31556e03-998a-48fb-b624-312cbb5b3c5b/Untitled.png)
+
+빈 속성복사 유틸클래스 - BeanUtils.copyProperties(from, to);
+
+HATEOAS
+
+링크된 정보까지 같이 응답해주면서 사용자에게 편의를 가져다 주는 기능
+
+어렵고 중요한 내용이니까 깊게 학습하기!
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/5c16b077-4015-4810-9271-439b134b942f/Untitled.png)
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/633068e9-e2cb-4aa4-8471-b504ac0ee06b/Untitled.png)
+
+Swagger
+
+버전이슈로 고생했던 내용
+
+부트2.6 이후버전부터는*`pring.mvc.pathmatch.matching-strategy` 값이* *`ant_apth_matcher`*
+
+ 에서 *`path_pattern_parser` 변경되어 몇몇 오류가 발생 application.yml 파일에 아래 속성 추가*
+
+부트2.6.7 / sawagger 3.0.0 사용
+
+```
+spring:
+	mvc:
+	  pathmatch:
+	    matching-strategy:ant_path_matcher
+```
+
+[http://localhost:8081/swagger-ui/index.html](http://localhost:8081/swagger-ui/index.html)
+
+  `@EnableSwagger2` / `@ApiModel` / `@ApiModelProperty` / `Docket.class`
+
+Actuator
+
+API 서버상태를 모니터링하는 라이브러리
+
+Hal Browser
+
+Actuator의 속성값들 확인하기에 좋은
+
+[http://localhost:8081/browser/index.html#/](http://localhost:8081/browser/index.html#/)
+
+Spring Security
+
+`spring-boot-starter-security` 2.6.7
+
+user / 2f2086c3-68bf-43b8-9127-662e85d1a5c
+
+너무 얕고 넓어서 아쉬움이 많이 남는 강의였지만 ㅎㅎ
+
+그래도 Swagger HATEOAS ExceptionHandler Proxy에 대해 공부할 수 있는 키워드는 얻게되었음!
+
+Server TO Server RestAPI 통신에 대해서 학습을 계속 이어가자!
