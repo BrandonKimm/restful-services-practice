@@ -14,9 +14,9 @@ public class UserDaoService {
     private static int userCount = 3;
 
     static{
-        users.add(new User(1, "A", new Date()));
-        users.add(new User(2, "B", new Date()));
-        users.add(new User(3, "C", new Date()));
+        users.add(new User(1, "A", new Date(),"pass1", "1233333-1102932"));
+        users.add(new User(2, "B", new Date(),"pass2", "4233333-1102932"));
+        users.add(new User(3, "C", new Date(),"pass3", "8273822-1102932"));
     }
 
     public List<User> findAll() {
@@ -25,6 +25,7 @@ public class UserDaoService {
 
     public User save(User user) {
         user.setId(++userCount);
+        System.out.println(user.getJoinDate());
         users.add(user);
         System.out.println(user.getName());
         return users.get(userCount-1);
